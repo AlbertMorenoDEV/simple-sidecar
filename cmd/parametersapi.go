@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/config"
 	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/parameter"
 	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/parameter/server"
 	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/parameter/storage/inmemory"
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -20,24 +21,22 @@ var rootCmd = &cobra.Command{
 	Short: "Feature flag server",
 	Long:  `Feature flag server manager.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Listening...")
+		conf := config.New()
 
-		var parameters map[string]*parameter.Parameter
+		var params map[string]*parameter.Parameter
 
-		if withData {
-			parameters = inmemory.Parameters
-		}
-
-		repo := inmemory.NewParameterRepository(parameters)
+		repo := inmemory.NewParameterRepository(params)
 		s := server.New(repo)
 
 		srv := &http.Server{
-			Addr:         "0.0.0.0:7983",
-			WriteTimeout: time.Second * 15,
-			ReadTimeout:  time.Second * 15,
-			IdleTimeout:  time.Second * 60,
+			Addr:         "0.0.0.0:" + conf.Parameters.Port,
+			WriteTimeout: time.Second * time.Duration(conf.Parameters.WriteTimeout),
+			ReadTimeout:  time.Second * time.Duration(conf.Parameters.ReadTimeout),
+			IdleTimeout:  time.Second * time.Duration(conf.Parameters.IdleTimeout),
 			Handler:      s.Router(),
 		}
+
+		log.Printf("Listening on port %v..\n", conf.Parameters.Port)
 
 		go func() {
 			if err := srv.ListenAndServe(); err != nil {
@@ -52,6 +51,7 @@ var rootCmd = &cobra.Command{
 
 		<-c
 
+		wait := time.Second * time.Duration(conf.Parameters.GracefulTimeout)
 		ctx, cancel := context.WithTimeout(context.Background(), wait)
 		defer cancel()
 		srv.Shutdown(ctx)
@@ -60,18 +60,16 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-var withData bool
-var wait time.Duration
-
 func init() {
-	rootCmd.Flags().BoolVarP(&withData, "with-data", "p", false, "Load sample data")
-	rootCmd.Flags().DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
 }
 
 // Execute command
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
