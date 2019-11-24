@@ -1,6 +1,7 @@
 # [Simple Sidecar](https://github.com/AlbertMorenoDEV/simple-sidecar)
 
 [![codecov](https://codecov.io/gh/AlbertMorenoDEV/simple-sidecar/branch/master/graph/badge.svg)](https://codecov.io/gh/AlbertMorenoDEV/simple-sidecar)
+[![build](https://github.com/AlbertMorenoDEV/simple-sidecar/workflows/Build%20and%20Test/badge.svg)](https://github.com/AlbertMorenoDEV/simple-sidecar/actions?query=workflow%3A%22Build+and+Test%22)
 
 
 # Start feature flag server
@@ -25,3 +26,9 @@
 # Run tests
 
 > go test ./... -v --bench . --benchmem --race
+
+# Create new version
+
+> git tag v0.1.0-alpha
+
+> git push --tags
