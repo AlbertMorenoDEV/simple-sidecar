@@ -2,6 +2,7 @@
 
 [![codecov](https://codecov.io/gh/AlbertMorenoDEV/simple-sidecar/branch/master/graph/badge.svg)](https://codecov.io/gh/AlbertMorenoDEV/simple-sidecar)
 [![build](https://github.com/AlbertMorenoDEV/simple-sidecar/workflows/Build%20and%20Test/badge.svg)](https://github.com/AlbertMorenoDEV/simple-sidecar/actions?query=workflow%3A%22Build+and+Test%22)
+[![release](https://img.shields.io/github/v/release/AlbertMorenoDEV/simple-sidecar.svg)](https://github.com/AlbertMorenoDEV/simple-sidecar/releases/latest)
 
 
 # Start feature flag server
