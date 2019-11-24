@@ -16,7 +16,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v1
     - name: Test
-      run: go test ./... -v --bench . --benchmem --race
+      run: go test ./... --race
 
   build:
     name: Build
