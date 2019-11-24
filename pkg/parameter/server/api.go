@@ -30,9 +30,9 @@ func New(repo parameter.Repository) Server {
 	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.deleteParameter).Methods(http.MethodDelete)
 	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.fetchParameter).Methods(http.MethodGet)
 
-	//r.Use(loggingMiddleware)
+	r.Use(accessLoggerMiddleware)
 
-	amw := authenticationMiddleware{}
+	amw := authenticatorMiddleware{}
 	amw.Populate()
 
 	s.Use(amw.Middleware)

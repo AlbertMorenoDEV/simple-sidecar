@@ -5,12 +5,12 @@ import (
 )
 
 // Define our struct
-type authenticationMiddleware struct {
+type authenticatorMiddleware struct {
 	tokenUsers map[string]string
 }
 
 // Initialize it somewhere
-func (amw *authenticationMiddleware) Populate() {
+func (amw *authenticatorMiddleware) Populate() {
 	amw.tokenUsers = make(map[string]string)
 	amw.tokenUsers["00000000"] = "user0"
 	amw.tokenUsers["aaaaaaaa"] = "userA"
@@ -19,7 +19,7 @@ func (amw *authenticationMiddleware) Populate() {
 }
 
 // Middleware function, which will be called for each request
-func (amw *authenticationMiddleware) Middleware(next http.Handler) http.Handler {
+func (amw *authenticatorMiddleware) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("X-Session-Token")
 
