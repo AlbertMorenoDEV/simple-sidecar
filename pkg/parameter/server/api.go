@@ -23,20 +23,19 @@ func New(repo parameter.Repository) Server {
 	a := &api{repository: repo}
 
 	r := mux.NewRouter()
-	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
-	})
-	r.HandleFunc("/parameters", a.fetchParameters).Methods(http.MethodGet)
-	r.HandleFunc("/parameters/{ID:[a-zA-Z0-9_]+}", a.updateParameter).Methods(http.MethodPost)
-	r.HandleFunc("/parameters/{ID:[a-zA-Z0-9_]+}", a.deleteParameter).Methods(http.MethodDelete)
-	r.HandleFunc("/parameters/{ID:[a-zA-Z0-9_]+}", a.fetchParameter).Methods(http.MethodGet)
+	r.HandleFunc("/health", a.health).Methods(http.MethodGet)
+	s := r.PathPrefix("/parameters").Subrouter()
+	s.HandleFunc("", a.fetchParameters).Methods(http.MethodGet)
+	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.updateParameter).Methods(http.MethodPut)
+	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.deleteParameter).Methods(http.MethodDelete)
+	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.fetchParameter).Methods(http.MethodGet)
 
-	r.Use(loggingMiddleware)
+	//r.Use(loggingMiddleware)
 
 	amw := authenticationMiddleware{}
 	amw.Populate()
 
-	r.Use(amw.Middleware)
+	s.Use(amw.Middleware)
 
 	a.router = r
 	return a
@@ -44,6 +43,11 @@ func New(repo parameter.Repository) Server {
 
 func (a *api) Router() http.Handler {
 	return a.router
+}
+
+func (a *api) health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 }
 
 func (a *api) updateParameter(w http.ResponseWriter, r *http.Request) {

@@ -23,16 +23,6 @@ func NewParameterRepository(parameters map[string]*parameter.Parameter) paramete
 	}
 }
 
-func (r *parameterRepository) CreateParameter(g *parameter.Parameter) error {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-	if err := r.checkIfExists(g.ID); err != nil {
-		return err
-	}
-	r.parameters[g.ID] = g
-	return nil
-}
-
 func (r *parameterRepository) FetchParameters() ([]*parameter.Parameter, error) {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
@@ -69,14 +59,4 @@ func (r *parameterRepository) FetchParameterByID(ID string) (*parameter.Paramete
 	}
 
 	return nil, fmt.Errorf("The ID %s doesn't exist", ID)
-}
-
-func (r *parameterRepository) checkIfExists(ID string) error {
-	for _, v := range r.parameters {
-		if v.ID == ID {
-			return fmt.Errorf("The parameter %s is already exist", ID)
-		}
-	}
-
-	return nil
 }
