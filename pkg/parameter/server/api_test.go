@@ -31,19 +31,20 @@ func TestHealth(t *testing.T) {
 }
 
 func TestFetchParameters(t *testing.T) {
-	parameters := map[string]*parameter.Parameter{
-		"parameter_1": &parameter.Parameter{
-			ID:    "parameter_1",
-			Value: "value_1",
-		},
-		"parameter_2": &parameter.Parameter{
-			ID:    "parameter_2",
-			Value: "value_2",
-		},
+	param1 := &parameter.Parameter{
+		ID:    "parameter_1",
+		Value: "value_1",
 	}
-	expected := `[{"ID":"parameter_1","value":"value_1"},{"ID":"parameter_2","value":"value_2"}]`
+	param2 := &parameter.Parameter{
+		ID:    "parameter_2",
+		Value: "value_2",
+	}
+	params := map[string]*parameter.Parameter{
+		"parameter_1": param1,
+		"parameter_2": param2,
+	}
 
-	repo := inmemory.NewParameterRepository(parameters)
+	repo := inmemory.NewParameterRepository(params)
 	s := New(repo)
 
 	req, err := http.NewRequest(http.MethodGet, "/parameters", nil)
@@ -56,7 +57,9 @@ func TestFetchParameters(t *testing.T) {
 	s.Router().ServeHTTP(rr, req)
 
 	assertStatusCode(t, rr, http.StatusOK)
-	assertEqualsJSON(t, rr.Body.String(), expected)
+	assertParametersCount(t, params, 2)
+	assertParametersExist(t, params, *param1)
+	assertParametersExist(t, params, *param2)
 }
 
 func TestFetchParameter(t *testing.T) {

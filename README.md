@@ -1,3 +1,8 @@
+# [Simple Sidecar](https://github.com/AlbertMorenoDEV/simple-sidecar)
+
+[![codecov](https://codecov.io/gh/AlbertMorenoDEV/simple-sidecar/branch/master/graph/badge.svg)](https://codecov.io/gh/AlbertMorenoDEV/simple-sidecar)
+
+
 # Start feature flag server
 
 > go run main.go featureflagapi --with-data
