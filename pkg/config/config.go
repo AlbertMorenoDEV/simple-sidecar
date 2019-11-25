@@ -1,16 +1,9 @@
 package config
 
 import (
-	"os"
-	"strconv"
-	"strings"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
-
-const defaultParametersPort = "7983"
-const defaultParametersWriteTimeout = 15
-const defaultParametersReadTimeout = 15
-const defaultParametersIdleTimeout = 60
-const defaultParametersGracefulTimeout = 15
 
 // ParametersConfig contains the API server configuration
 type ParametersConfig struct {
@@ -28,59 +21,48 @@ type Config struct {
 	AuthenticationTokens []string
 }
 
+// Setup prepares config
+func Setup(com *cobra.Command) {
+	viper.SetEnvPrefix("ss_parameters")
+
+	// persistent flags
+	com.PersistentFlags().StringP("port", "p", "7983", "api server port")
+	com.PersistentFlags().Int("write-timeout", 15, "api server write timeout in seconds")
+	com.PersistentFlags().Int("read-timeout", 15, "api server read timeout in seconds")
+	com.PersistentFlags().Int("idle-timeout", 60, "api server idle timeout in seconds")
+	com.PersistentFlags().Int("graceful-timeout", 15, "duration for which the server gracefully wait for existing connections to finish in seconds")
+	com.PersistentFlags().Bool("debug-mode", false, "debug mode status")
+	com.PersistentFlags().StringSlice("auth-tokens", []string{""}, "authetication tokens")
+
+	// binded flags
+	viper.BindPFlag("port", com.PersistentFlags().Lookup("port"))
+	viper.BindPFlag("write-timeout", com.PersistentFlags().Lookup("write-timeout"))
+	viper.BindPFlag("read-timeout", com.PersistentFlags().Lookup("read-timeout"))
+	viper.BindPFlag("idle-timeout", com.PersistentFlags().Lookup("idle-timeout"))
+	viper.BindPFlag("graceful-timeout", com.PersistentFlags().Lookup("graceful-timeout"))
+	viper.BindPFlag("debug-mode", com.PersistentFlags().Lookup("debug-mode"))
+	viper.BindPFlag("auth-tokens", com.PersistentFlags().Lookup("auth-tokens"))
+
+	viper.BindEnv("port")
+	viper.BindEnv("write-timeout")
+	viper.BindEnv("read-timeout")
+	viper.BindEnv("idle-timeout")
+	viper.BindEnv("graceful-timeout")
+	viper.BindEnv("debug-mode")
+	viper.BindEnv("auth-tokens")
+}
+
 // New returns a new Config struct
 func New() *Config {
 	return &Config{
 		Parameters: ParametersConfig{
-			Port:            getEnv("SS_PARAMETERS_PORT", defaultParametersPort),
-			WriteTimeout:    getEnvAsInt("SS_PARAMETERS_WRITE_TIMEOUT", defaultParametersWriteTimeout),
-			ReadTimeout:     getEnvAsInt("SS_PARAMETERS_READ_TIMEOUT", defaultParametersReadTimeout),
-			IdleTimeout:     getEnvAsInt("SS_PARAMETERS_IDLE_TIMEOUT", defaultParametersIdleTimeout),
-			GracefulTimeout: getEnvAsInt("SS_PARAMETERS_GRACEFUL_TIMEOUT", defaultParametersGracefulTimeout),
+			Port:            viper.GetString("port"),
+			WriteTimeout:    viper.GetInt("write-timeout"),
+			ReadTimeout:     viper.GetInt("read-timeout"),
+			IdleTimeout:     viper.GetInt("idle-timeout"),
+			GracefulTimeout: viper.GetInt("graceful-timeout"),
 		},
-		DebugMode:            getEnvAsBool("SS_DEBUG_MODE", false),
-		AuthenticationTokens: getEnvAsSlice("SS_AUTH_TOKENS", []string{""}, ","),
+		DebugMode:            viper.GetBool("debug-mode"),
+		AuthenticationTokens: viper.GetStringSlice("auth-tokens"),
 	}
-}
-
-// Simple helper function to read an environment or return a default value
-func getEnv(key string, defaultVal string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-
-	return defaultVal
-}
-
-// Simple helper function to read an environment variable into integer or return a default value
-func getEnvAsInt(name string, defaultVal int) int {
-	valueStr := getEnv(name, "")
-	if value, err := strconv.Atoi(valueStr); err == nil {
-		return value
-	}
-
-	return defaultVal
-}
-
-// Helper to read an environment variable into a bool or return default value
-func getEnvAsBool(name string, defaultVal bool) bool {
-	valStr := getEnv(name, "")
-	if val, err := strconv.ParseBool(valStr); err == nil {
-		return val
-	}
-
-	return defaultVal
-}
-
-// Helper to read an environment variable into a string slice or return default value
-func getEnvAsSlice(name string, defaultVal []string, sep string) []string {
-	valStr := getEnv(name, "")
-
-	if valStr == "" {
-		return defaultVal
-	}
-
-	val := strings.Split(valStr, sep)
-
-	return val
 }

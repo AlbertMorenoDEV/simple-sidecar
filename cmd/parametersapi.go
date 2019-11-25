@@ -12,7 +12,6 @@ import (
 	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/parameter"
 	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/parameter/server"
 	"github.com/AlbertMorenoDEV/simple-sidecar/pkg/parameter/storage/inmemory"
-	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -61,9 +60,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Print("No .env file found")
-	}
+	config.Setup(rootCmd)
 }
 
 // Execute command
