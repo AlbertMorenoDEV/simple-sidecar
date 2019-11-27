@@ -24,6 +24,7 @@ func New(repo parameter.Repository) Server {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/health", a.health).Methods(http.MethodGet)
+
 	s := r.PathPrefix("/parameters").Subrouter()
 	s.HandleFunc("", a.fetchParameters).Methods(http.MethodGet)
 	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.updateParameter).Methods(http.MethodPut)
