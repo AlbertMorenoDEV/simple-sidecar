@@ -27,6 +27,7 @@ func New(repo parameter.Repository) Server {
 
 	s := r.PathPrefix("/parameters").Subrouter()
 	s.HandleFunc("", a.fetchParameters).Methods(http.MethodGet)
+	s.HandleFunc("", a.updateParameter).Methods(http.MethodPost)
 	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.updateParameter).Methods(http.MethodPut)
 	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.deleteParameter).Methods(http.MethodDelete)
 	s.HandleFunc("/{ID:[a-zA-Z0-9_]+}", a.fetchParameter).Methods(http.MethodGet)
@@ -47,6 +48,7 @@ func (a *api) Router() http.Handler {
 }
 
 func (a *api) health(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 }
@@ -87,12 +89,12 @@ func (a *api) fetchParameters(w http.ResponseWriter, r *http.Request) {
 func (a *api) fetchParameter(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	param, err := a.repository.FetchParameterByID(vars["ID"])
-	w.Header().Set("Content-Type", "application/json")
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		json.NewEncoder(w).Encode("Parameter Not found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(param)
 }
